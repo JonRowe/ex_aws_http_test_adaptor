@@ -13,7 +13,8 @@ defmodule ExAwsHttpTestAdaptor.MixProject do
 
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger],
+      mod: {ExAwsHttpTestAdaptor.Server, []}
     ]
   end
 
