@@ -19,6 +19,7 @@ defmodule ExAwsHttpTestAdaptor.MixProject do
 
   defp deps do
     [
+      {:ex_aws, "~> 2.1"}
     ]
   end
 end
