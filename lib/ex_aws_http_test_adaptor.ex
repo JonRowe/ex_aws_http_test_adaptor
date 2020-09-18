@@ -15,11 +15,22 @@ defmodule ExAwsHttpTestAdaptor do
   """
   @impl true
   def request(method, url, req_body, headers, http_opts) do
-    Logger.debug("#{String.upcase(to_string(method))} call made to #{url}")
+    verb = String.upcase(to_string(method))
+    Logger.debug("#{verb} call made to #{url}")
 
-    {status, _headers, body} = GenServer.call(Server, {:request, self(), method, url, req_body, headers, http_opts})
+    case GenServer.call(Server, {:request, self(), method, url, req_body, headers, http_opts}) do
+      {status, _headers, body} -> {:ok, %{status_code: status, body: body}}
+      :raise -> raise "Refuted #{verb} to #{url} was called."
+    end
+  end
 
-    {:ok, %{status_code: status, body: body}}
+  @doc """
+  Deliberately cause a failure for a url and method.
+  """
+  def refute(url, opts \\ []) do
+    method = Keyword.get(opts, :method, :get)
+    pid = Keyword.get(opts, :pid, self())
+    GenServer.call(Server, {:prevent, pid, method, url})
   end
 
   @doc """

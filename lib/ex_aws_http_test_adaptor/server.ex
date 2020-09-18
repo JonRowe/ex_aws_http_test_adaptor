@@ -21,6 +21,10 @@ defmodule ExAwsHttpTestAdaptor.Server do
 
   def start_link(args), do: GenServer.start_link(__MODULE__, args, name: __MODULE__)
 
+  def handle_call({:prevent, pid, method, path}, _, %{calls: calls}) do
+    {:reply, :ok, update_calls(calls, pid, method, path, :raise)}
+  end
+
   def handle_call({:set, pid, method, path, response}, _, %{calls: calls}) do
     {:reply, :ok, update_calls(calls, pid, method, path, response)}
   end
@@ -50,6 +54,7 @@ defmodule ExAwsHttpTestAdaptor.Server do
   end
 
   defp handle_hit([response = {_, _, _} | _]), do: response
+  defp handle_hit([:raise | _]), do: :raise
   defp handle_hit([]), do: @not_found
 
   defp set_call(call, method, path, value) do

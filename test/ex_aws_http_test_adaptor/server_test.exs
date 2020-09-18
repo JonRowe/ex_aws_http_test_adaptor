@@ -36,6 +36,11 @@ defmodule ExAwsHttpTestAdaptor.ServerTest do
       assert {200, [], ["OK"]} == GenServer.call(pid, {:request, self(), :get, "/some/path", "", [], []})
       assert {201, [], ["OK"]} == GenServer.call(pid, {:request, self(), :post, "/some/path", "", [], []})
     end
+
+    test "it supports failing (preventing responses)", %{pid: pid} do
+      GenServer.call(pid, {:prevent, self(), :get, "/some/path"})
+      assert :raise == GenServer.call(pid, {:request, self(), :get, "/some/path", "", [], []})
+    end
   end
 
   defp find_server(_), do: {:ok, pid: Process.whereis(Server)}
