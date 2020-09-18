@@ -1,6 +1,8 @@
 defmodule ExAwsHttpTestAdaptor.Server do
   use GenServer
 
+  require Logger
+
   def init(_) do
     {:ok, %{calls: %{}}}
   end
@@ -32,12 +34,17 @@ defmodule ExAwsHttpTestAdaptor.Server do
   defguardp map_get(map, key) when :erlang.map_get(key, map)
 
   defp request(call, method, path) when is_map_key(call, path) and is_map_key(map_get(call, path), method) do
+    Logger.debug("Hit for #{method} #{path}")
+
     call
     |> Map.get(path)
     |> Map.get(method)
   end
 
-  defp request(_, _, _), do: {404, [], []}
+  defp request(call, method, path) do
+    Logger.debug("No call found for #{method} #{path} in #{inspect(call)}")
+    {404, [], []}
+  end
 
   defp set_call(map, method, path, status, headers, body) do
     Map.put(map, path, Map.put(get(map, path), method, {status, headers, body}))
