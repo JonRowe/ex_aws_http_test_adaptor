@@ -22,17 +22,25 @@ defmodule ExAwsHttpTestAdaptor.ServerTest do
     end
 
     test "it allows setting a response", %{pid: pid} do
-      assert :ok == GenServer.call(pid, {:set, self(), :get, "/some/path", {200, [], ["OK"]}})
+      assert :ok == GenServer.call(pid, {:set, self(), :get, "/some/path", [], {200, [], ["OK"]}})
     end
 
     test "it returns a previously set response", %{pid: pid} do
-      GenServer.call(pid, {:set, self(), :get, "/some/path", {200, [], ["OK"]}})
+      GenServer.call(pid, {:set, self(), :get, "/some/path", [], {200, [], ["OK"]}})
       assert {200, [], ["OK"]} == GenServer.call(pid, {:request, self(), :get, "/some/path", "", [], []})
     end
 
+    test "it supports filtering responses on headers", %{pid: pid} do
+      GenServer.call(pid, {:set, self(), :get, "/some/path", [{"allow", "header"}], {200, [], ["OK"]}})
+      assert {404, [], []} == GenServer.call(pid, {:request, self(), :get, "/some/path", "", [], []})
+
+      header_based_request = {:request, self(), :get, "/some/path", "", [{"allow", "header"}, {"other", "header"}], []}
+      assert {200, [], ["OK"]} == GenServer.call(pid, header_based_request)
+    end
+
     test "it supports multiple set responses", %{pid: pid} do
-      GenServer.call(pid, {:set, self(), :get, "/some/path", {200, [], ["OK"]}})
-      GenServer.call(pid, {:set, self(), :post, "/some/path", {201, [], ["OK"]}})
+      GenServer.call(pid, {:set, self(), :get, "/some/path", [], {200, [], ["OK"]}})
+      GenServer.call(pid, {:set, self(), :post, "/some/path", [], {201, [], ["OK"]}})
       assert {200, [], ["OK"]} == GenServer.call(pid, {:request, self(), :get, "/some/path", "", [], []})
       assert {201, [], ["OK"]} == GenServer.call(pid, {:request, self(), :post, "/some/path", "", [], []})
     end

@@ -40,8 +40,9 @@ defmodule ExAwsHttpTestAdaptor do
     headers = Keyword.get(opts, :headers, [])
     method = Keyword.get(opts, :method, :get)
     pid = Keyword.get(opts, :pid, self())
+    required_headers = Keyword.get(opts, :required_headers, [])
     status = Keyword.get(opts, :status, 200)
 
-    GenServer.call(Server, {:set, pid, method, url, {status, headers, body}})
+    GenServer.call(Server, {:set, pid, method, url, required_headers, {status, headers, body}})
   end
 end
