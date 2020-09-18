@@ -29,6 +29,13 @@ defmodule ExAwsHttpTestAdaptor.ServerTest do
       GenServer.call(pid, {:set, self(), :get, "/some/path", {200, [], ["OK"]}})
       assert {200, [], ["OK"]} == GenServer.call(pid, {:request, self(), :get, "/some/path", "", [], []})
     end
+
+    test "it supports multiple set responses", %{pid: pid} do
+      GenServer.call(pid, {:set, self(), :get, "/some/path", {200, [], ["OK"]}})
+      GenServer.call(pid, {:set, self(), :post, "/some/path", {201, [], ["OK"]}})
+      assert {200, [], ["OK"]} == GenServer.call(pid, {:request, self(), :get, "/some/path", "", [], []})
+      assert {201, [], ["OK"]} == GenServer.call(pid, {:request, self(), :post, "/some/path", "", [], []})
+    end
   end
 
   defp find_server(_), do: {:ok, pid: Process.whereis(Server)}
