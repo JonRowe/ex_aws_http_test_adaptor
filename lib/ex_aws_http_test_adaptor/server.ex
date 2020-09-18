@@ -18,7 +18,7 @@ defmodule ExAwsHttpTestAdaptor.Server do
   def start_link(args), do: GenServer.start_link(__MODULE__, args, name: __MODULE__)
 
   def handle_call({:set, pid, method, path, status, headers, body}, _, %{calls: calls}) do
-    {:reply,:ok, %{calls: Map.put(calls, pid, set_call(get(calls, pid), method, path, status, headers, body))}}
+    {:reply, :ok, %{calls: Map.put(calls, pid, set_call(get(calls, pid), method, path, status, headers, body))}}
   end
 
   def handle_call({:request, pid, method, path, _body, _headers, _opts}, _, state = %{calls: calls}) do
@@ -31,7 +31,7 @@ defmodule ExAwsHttpTestAdaptor.Server do
 
   defguardp map_get(map, key) when :erlang.map_get(key, map)
 
-  defp request(call, method, path) when is_map_key(call, path) and is_map_key(map_get(call, path), method)do
+  defp request(call, method, path) when is_map_key(call, path) and is_map_key(map_get(call, path), method) do
     call
     |> Map.get(path)
     |> Map.get(method)

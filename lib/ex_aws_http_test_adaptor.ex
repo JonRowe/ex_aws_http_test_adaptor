@@ -15,8 +15,10 @@ defmodule ExAwsHttpTestAdaptor do
   """
   @impl true
   def request(method, url, req_body, headers, http_opts) do
-    Logger.debug "Call made to #{url}"
+    Logger.debug("Call made to #{url}")
+
     {status, _headers, body} = GenServer.call(Server, {:request, self(), method, url, req_body, headers, http_opts})
+
     {:ok, %{status_code: status, body: body}}
   end
 

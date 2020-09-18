@@ -13,7 +13,7 @@ defmodule ExAwsHttpTestAdaptor.ServerTest do
     end
   end
 
-  #def request(method, url, req_body, headers, http_opts) do
+  # def request(method, url, req_body, headers, http_opts) do
   describe "handle_call/2" do
     setup :find_server
 

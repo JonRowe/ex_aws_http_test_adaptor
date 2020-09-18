@@ -4,6 +4,8 @@ defmodule ExAwsHttpTestAdaptorTest do
 
   test "it will default to the current processes requests" do
     ExAwsHttpTestAdaptor.set("https://amazon.com/s3/", "OK")
-    assert {:ok, %{status_code: 200, body: "OK"}} = ExAwsHttpTestAdaptor.request(:get, "https://amazon.com/s3/", "", [], [])
+
+    assert {:ok, %{status_code: 200, body: "OK"}} =
+             ExAwsHttpTestAdaptor.request(:get, "https://amazon.com/s3/", "", [], [])
   end
 end
