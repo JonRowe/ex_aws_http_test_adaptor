@@ -31,6 +31,6 @@ defmodule ExAwsHttpTestAdaptor do
     pid = Keyword.get(opts, :pid, self())
     status = Keyword.get(opts, :status, 200)
 
-    GenServer.call(Server, {:set, pid, method, url, status, headers, body})
+    GenServer.call(Server, {:set, pid, method, url, {status, headers, body}})
   end
 end

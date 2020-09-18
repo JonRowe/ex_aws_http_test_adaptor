@@ -3,6 +3,8 @@ defmodule ExAwsHttpTestAdaptor.Server do
 
   require Logger
 
+  @not_found {404, [], []}
+
   def init(_) do
     {:ok, %{calls: %{}}}
   end
@@ -19,8 +21,8 @@ defmodule ExAwsHttpTestAdaptor.Server do
 
   def start_link(args), do: GenServer.start_link(__MODULE__, args, name: __MODULE__)
 
-  def handle_call({:set, pid, method, path, status, headers, body}, _, %{calls: calls}) do
-    {:reply, :ok, %{calls: Map.put(calls, pid, set_call(get(calls, pid), method, path, status, headers, body))}}
+  def handle_call({:set, pid, method, path, response}, _, %{calls: calls}) do
+    {:reply, :ok, update_calls(calls, pid, method, path, response)}
   end
 
   def handle_call({:request, pid, method, path, _body, _headers, _opts}, _, state = %{calls: calls}) do
@@ -39,14 +41,22 @@ defmodule ExAwsHttpTestAdaptor.Server do
     call
     |> Map.get(path)
     |> Map.get(method)
+    |> handle_hit()
   end
 
   defp request(call, method, path) do
     Logger.debug("No call found for #{method} #{path} in #{inspect(call)}")
-    {404, [], []}
+    @not_found
   end
 
-  defp set_call(map, method, path, status, headers, body) do
-    Map.put(map, path, Map.put(get(map, path), method, {status, headers, body}))
+  defp handle_hit([response = {_, _, _} | _]), do: response
+  defp handle_hit([]), do: @not_found
+
+  defp set_call(call, method, path, value) do
+    Map.put(call, path, Map.update(get(call, path), method, [value], &(&1 ++ [value])))
+  end
+
+  defp update_calls(calls, pid, method, path, value) do
+    %{calls: Map.put(calls, pid, set_call(get(calls, pid), method, path, value))}
   end
 end

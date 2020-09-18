@@ -22,11 +22,11 @@ defmodule ExAwsHttpTestAdaptor.ServerTest do
     end
 
     test "it allows setting a response", %{pid: pid} do
-      assert :ok == GenServer.call(pid, {:set, self(), :get, "/some/path", 200, [], ["OK"]})
+      assert :ok == GenServer.call(pid, {:set, self(), :get, "/some/path", {200, [], ["OK"]}})
     end
 
     test "it returns a previously set response", %{pid: pid} do
-      GenServer.call(pid, {:set, self(), :get, "/some/path", 200, [], ["OK"]})
+      GenServer.call(pid, {:set, self(), :get, "/some/path", {200, [], ["OK"]}})
       assert {200, [], ["OK"]} == GenServer.call(pid, {:request, self(), :get, "/some/path", "", [], []})
     end
   end
