@@ -5,7 +5,7 @@ defmodule ExAwsHttpTestAdaptor.ServerTest do
 
   describe "init/1" do
     test "it provides an empty state" do
-      assert {:ok, %{configured: %{}}} = Server.init(nil)
+      assert {:ok, %{configured: %{}, received: %{}}} = Server.init(nil)
     end
 
     test "it is booted on startup" do
@@ -57,6 +57,16 @@ defmodule ExAwsHttpTestAdaptor.ServerTest do
     test "it supports failing (preventing responses)", %{pid: pid} do
       GenServer.call(pid, {:prevent, self(), :get, "/some/path"})
       assert :raise == GenServer.call(pid, {:request, self(), :get, "/some/path", "", [], []})
+    end
+
+    test "it records calls", %{pid: pid} do
+      GenServer.call(pid, {:request, self(), :get, "/some/path", "", [], []})
+      GenServer.call(pid, {:request, self(), :post, "/some/path", "", [], []})
+
+      assert GenServer.call(pid, {:calls, self()}) == [
+        {:get, "/some/path", [], ""},
+        {:post, "/some/path", [], ""}
+      ]
     end
   end
 

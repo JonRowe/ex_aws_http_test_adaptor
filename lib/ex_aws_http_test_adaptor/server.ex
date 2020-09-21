@@ -6,7 +6,7 @@ defmodule ExAwsHttpTestAdaptor.Server do
   @not_found {404, [], []}
 
   def init(_) do
-    {:ok, %{configured: %{}}}
+    {:ok, %{configured: %{}, received: %{}}}
   end
 
   def start(_type, _args) do
@@ -21,6 +21,8 @@ defmodule ExAwsHttpTestAdaptor.Server do
 
   def start_link(args), do: GenServer.start_link(__MODULE__, args, name: __MODULE__)
 
+  def handle_call({:calls, pid}, _, state = %{received: calls}), do: {:reply, Map.get(calls, pid, []), state}
+
   def handle_call({:prevent, pid, method, path}, _, state) do
     {:reply, :ok, update_configured(state, pid, method, path, :raise)}
   end
@@ -29,8 +31,8 @@ defmodule ExAwsHttpTestAdaptor.Server do
     {:reply, :ok, update_configured(state, pid, method, path, {required_headers, response})}
   end
 
-  def handle_call({:request, pid, method, path, _body, headers, _opts}, _, state = %{configured: calls}) do
-    {:reply, request(get(calls, pid), method, path, headers), state}
+  def handle_call({:request, pid, method, path, body, headers, _opts}, _, state = %{configured: calls}) do
+    {:reply, request(get(calls, pid), method, path, headers), record(state, pid, {method, path, headers, body})}
   end
 
   def handle_call(_, _, state), do: {:noreply, state}
@@ -90,5 +92,9 @@ defmodule ExAwsHttpTestAdaptor.Server do
 
   defp update_configured(state = %{configured: calls}, pid, method, path, value) do
     Map.put(state, :configured, Map.put(calls, pid, set_call(get(calls, pid), method, path, value)))
+  end
+
+  defp record(state = %{received: received}, pid, call) do
+    Map.put(state, :received, Map.update(received, pid, [call], fn calls -> calls ++ [call] end))
   end
 end
