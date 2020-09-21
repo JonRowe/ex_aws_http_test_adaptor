@@ -25,6 +25,14 @@ defmodule ExAwsHttpTestAdaptor do
   end
 
   @doc """
+  Return calls that have been made.
+  """
+  def calls(opts \\ []) do
+    pid = Keyword.get(opts, :pid, self())
+    GenServer.call(Server, {:calls, pid})
+  end
+
+  @doc """
   Deliberately cause a failure for a url and method.
   """
   def refute(url, opts \\ []) do

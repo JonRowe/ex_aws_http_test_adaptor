@@ -9,6 +9,16 @@ defmodule ExAwsHttpTestAdaptorTest do
              ExAwsHttpTestAdaptor.request(:get, "https://amazon.com/s3/", "", [], [])
   end
 
+  describe "calls/0" do
+    test "it will return current pid calls by default" do
+      assert ExAwsHttpTestAdaptor.calls() == []
+
+      ExAwsHttpTestAdaptor.request(:get, "https://amazon.com/s3/", "", [], [])
+
+      assert ExAwsHttpTestAdaptor.calls() == [{:get, "https://amazon.com/s3/", [], ""}]
+    end
+  end
+
   test "it will allow refuting a url combo" do
     ExAwsHttpTestAdaptor.refute("https://amazon.com/s3/", method: :delete)
 
