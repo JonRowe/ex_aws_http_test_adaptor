@@ -40,7 +40,7 @@ defmodule ExAwsHttpTestAdaptor.Server do
   defguardp map_get(map, key) when :erlang.map_get(key, map)
 
   defp request(call, method, path, headers) when is_map_key(call, path) and is_map_key(map_get(call, path), method) do
-    Logger.debug("Hit for #{method} #{inspect path}")
+    Logger.debug("Hit for #{method} #{inspect(path)}")
 
     call
     |> Map.get(path)
@@ -50,7 +50,7 @@ defmodule ExAwsHttpTestAdaptor.Server do
 
   defp request(call, method, path, headers) do
     with {found_path, _} <- Enum.find(call, fn {key, value} -> Regex.match?(key, path) && is_map_key(value, method) end) do
-      Logger.debug("Looking for call matching #{inspect path} via #{inspect found_path}")
+      Logger.debug("Looking for call matching #{inspect(path)} via #{inspect(found_path)}")
       request(call, method, found_path, headers)
     else
       _ ->
