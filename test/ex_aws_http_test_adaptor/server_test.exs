@@ -5,7 +5,7 @@ defmodule ExAwsHttpTestAdaptor.ServerTest do
 
   describe "init/1" do
     test "it provides an empty state" do
-      assert {:ok, %{calls: %{}}} = Server.init(nil)
+      assert {:ok, %{configured: %{}}} = Server.init(nil)
     end
 
     test "it is booted on startup" do
