@@ -49,15 +49,25 @@ defmodule ExAwsHttpTestAdaptor.Server do
   end
 
   defp request(call, method, path, headers) do
-    with {found_path, _} <- Enum.find(call, fn {key, value} -> Regex.match?(key, path) && is_map_key(value, method) end) do
-      Logger.debug("Looking for call matching #{inspect(path)} via #{inspect(found_path)}")
+    if found_path = find_regex_path(Enum.into(call, []), path, method) do
+      Logger.debug("Looking for call matching #{inspect(found_path)} from #{inspect(path)}")
       request(call, method, found_path, headers)
     else
-      _ ->
-        Logger.debug("No call found for #{method} #{path} in #{inspect(call)}")
-        @not_found
+      Logger.debug("No call found for #{method} #{path} in #{inspect(call)}")
+      @not_found
     end
   end
+
+  defp find_regex_path([{%Regex{} = regex_path, call} | rest], path, method) when is_map_key(call, method) do
+    if Regex.match?(regex_path, path) do
+      regex_path
+    else
+      find_regex_path(rest, path, method)
+    end
+  end
+
+  defp find_regex_path([_ | rest], path, method), do: find_regex_path(rest, path, method)
+  defp find_regex_path([], _path, _method), do: nil
 
   defp handle_hit([:raise | _], _), do: :raise
   defp handle_hit([], _), do: @not_found

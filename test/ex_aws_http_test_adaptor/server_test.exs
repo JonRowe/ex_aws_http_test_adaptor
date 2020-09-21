@@ -30,6 +30,11 @@ defmodule ExAwsHttpTestAdaptor.ServerTest do
       assert {200, [], ["OK"]} == GenServer.call(pid, {:request, self(), :get, "/some/path", "", [], []})
     end
 
+    test "it still returns 404 if a set response is a mismatch", %{pid: pid} do
+      GenServer.call(pid, {:set, self(), :get, "/other/path", [], {200, [], ["OK"]}})
+      assert {404, [], []} == GenServer.call(pid, {:request, self(), :get, "/some/path", "", [], []})
+    end
+
     test "it supports regular expresions for paths", %{pid: pid} do
       GenServer.call(pid, {:set, self(), :get, ~r{/some}, [], {200, [], ["OK"]}})
       assert {200, [], ["OK"]} == GenServer.call(pid, {:request, self(), :get, "/some/path", "", [], []})
