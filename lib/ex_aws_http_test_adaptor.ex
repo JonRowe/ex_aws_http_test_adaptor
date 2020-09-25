@@ -16,7 +16,7 @@ defmodule ExAwsHttpTestAdaptor do
   @impl true
   def request(method, url, req_body, headers, http_opts) do
     verb = String.upcase(to_string(method))
-    Logger.debug("#{verb} call made to #{url}")
+    Logger.debug("[#{inspect self()}] #{verb} call made to #{url}")
 
     case GenServer.call(Server, {:request, self(), method, url, req_body, headers, http_opts}) do
       {status, _headers, body} -> {:ok, %{status_code: status, body: body}}
@@ -50,6 +50,8 @@ defmodule ExAwsHttpTestAdaptor do
     pid = Keyword.get(opts, :pid, self())
     required_headers = Keyword.get(opts, :required_headers, [])
     status = Keyword.get(opts, :status, 200)
+
+    Logger.debug("[#{inspect pid}] #{String.upcase(to_string(method))} set for #{url}")
 
     GenServer.call(Server, {:set, pid, method, url, required_headers, {status, headers, body}})
   end
