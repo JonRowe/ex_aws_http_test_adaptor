@@ -19,7 +19,7 @@ defmodule ExAwsHttpTestAdaptor do
     Logger.debug("[#{inspect self()}] #{verb} call made to #{url}")
 
     case GenServer.call(Server, {:request, self(), method, url, req_body, headers, http_opts}) do
-      {status, _headers, body} -> {:ok, %{status_code: status, body: body}}
+      {status, response_headers, body} -> {:ok, %{status_code: status, body: body, headers: response_headers}}
       :raise -> raise "Refuted #{verb} to #{url} was called."
     end
   end

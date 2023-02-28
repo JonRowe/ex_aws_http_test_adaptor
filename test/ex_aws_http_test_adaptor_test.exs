@@ -9,6 +9,13 @@ defmodule ExAwsHttpTestAdaptorTest do
              ExAwsHttpTestAdaptor.request(:get, "https://amazon.com/s3/", "", [], [])
   end
 
+  test "it supports returning headers" do
+    ExAwsHttpTestAdaptor.set("https://amazon.com/s3/", "OK", headers: [{"content-length", 2}])
+
+    assert {:ok, %{status_code: 200, body: "OK", headers: [{"content-length", 2}]}} =
+             ExAwsHttpTestAdaptor.request(:get, "https://amazon.com/s3/", "", [], [])
+  end
+
   test "it isolates processes" do
     Task.start(fn -> ExAwsHttpTestAdaptor.set("https://amazon.com/s3/", "OK") end)
 
